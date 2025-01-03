@@ -283,6 +283,23 @@ def is_valid_move(board, row, col, number):
                 return False
     return True
 
+def validate_input(x, y, number, table_data):
+    # Verifica linha, coluna e quadrante para validar o número
+    if number in selected_line(table_data, y):
+        return False
+    if number in selected_column(table_data, x):
+        return False
+    if number in selected_quadrant(table_data, x, y):
+        return False
+    return True
+
+def handle_input(event, table_data, x, y):
+    if event.key == pg.K_1 or event.key == pg.K_2 or event.key == pg.K_3 or event.key == pg.K_4 or event.key == pg.K_5 or event.key == pg.K_6 or event.key == pg.K_7 or event.key == pg.K_8 or event.key == pg.K_9:
+        number = int(event.unicode)
+        # Permitir edição da célula selecionada, mesmo que válida
+        table_data[y][x] = number
+    return table_data
+
 
 selected_celule = None  
 
@@ -291,6 +308,8 @@ while True:
         if event.type == pg.QUIT:
             pg.quit()
             quit()
+        
+        # Processamento de clique do mouse
         if event.type == pg.MOUSEBUTTONDOWN:
             x, y = pg.mouse.get_pos()
             if 50 <= x <= 650 and 50 <= y <= 650:  
@@ -298,51 +317,49 @@ while True:
                 row = (y - 50) // 66
                 selected_celule = (row, col)
 
-       
+        # Processamento de teclado para preencher a célula
         if event.type == pg.KEYDOWN:
             if selected_celule:
                 row, col = selected_celule
                 if event.unicode.isdigit(): 
                     number = int(event.unicode)
-                    if is_valid_move(game_data, row, col, number): 
-                        game_data[row][col] = number  
-                    else:
-                        print(f"Número {number} inválido para a célula ({row}, {col})")
+                    # Permitir edição da célula selecionada
+                    game_data[row][col] = number  # Atualiza diretamente, mesmo se válido
+
+    # Atualização da tela
     window.fill(preto)
     table(window)
+    
+    # Desenha os números na tabela
     for i in range(9):
         for j in range(9):
             if game_data[i][j] != 'n':
                 number_surface = font.render(str(game_data[i][j]), True, branco)
                 window.blit(number_surface, (50 + j * 66 + 20, 50 + i * 66 + 10))
+    
+    # Destacar célula selecionada
     if selected_celule:
         row, col = selected_celule
         highlight_rect = pg.Rect(50 + col * 66, 50 + row * 66, 66, 66)
         pg.draw.rect(window, (255, 0, 0), highlight_rect, 3)  
 
-
-## variáveis de posição ##
-
+    ## Variáveis de posição do mouse ##
     mouse = pg.mouse.get_pos()
     mouse_position_x = mouse[0]
-    mouse_position_y = mouse [1]
+    mouse_position_y = mouse[1]
     click = pg.mouse.get_pressed()
 
-
-## jogo ##
-
-    table_hover(window,mouse_position_x,mouse_position_y)
-    click_position_x,click_position_y=selected_cell(window,mouse_position_x,mouse_position_y,click_last_status,click[0],click_position_x,click_position_y)
+    ## Jogo ##
+    table_hover(window, mouse_position_x, mouse_position_y)
+    click_position_x, click_position_y = selected_cell(window, mouse_position_x, mouse_position_y, click_last_status, click[0], click_position_x, click_position_y)
     table(window)
     restart_button(window)
-    table_data,full_table=table_answer(table_data,full_table)
-    game_data,hide_numbers=hiding_numbers(table_data,game_data,hide_numbers)
-    writing_numbers(window,game_data)
-    number=(number)
-    game_data,number=check_digits(window,table_data,game_data,click_position_x,click_position_y,number)
-    full_table,hide_numbers,table_data,game_data=click_restart(mouse_position_x, mouse_position_y, click_last_status, click[0],full_table,hide_numbers,table_data,game_data)
-    
-    
+    table_data, full_table = table_answer(table_data, full_table)
+    game_data, hide_numbers = hiding_numbers(table_data, game_data, hide_numbers)
+    writing_numbers(window, game_data)
+    number = (number)
+    game_data, number = check_digits(window, table_data, game_data, click_position_x, click_position_y, number)
+    full_table, hide_numbers, table_data, game_data = click_restart(mouse_position_x, mouse_position_y, click_last_status, click[0], full_table, hide_numbers, table_data, game_data)
 
     if click[0] == True:
         click_last_status = True
